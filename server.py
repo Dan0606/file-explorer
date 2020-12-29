@@ -37,7 +37,7 @@ def get_files(s, client, path):
         allFiles = data.split(";")
         for f in allFiles:
             if f == "":
-                print("file is empty")
+                print("file is empty") 
             else:
                 print(f)
         keepGo = input("Keep Go? ").lower()
@@ -89,4 +89,4 @@ def main():
         
     s.close()
 
-main()
+main() # starting the main function
