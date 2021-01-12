@@ -1,20 +1,28 @@
 import socket
-HOST = '127.0.0.1'
-PORT = 52472 
+from time import sleep
+HOST = '0.0.0.0'
+PORT = 12233 
 
 def download_file(s, client, path):
     client.send(path.encode())
+    name = path.split("/")
+    name = name[-1]
+    ends = name.split(".")
+    ends = ends[-1]
+    print(ends)
     resp = client.recv(10).decode()
     filesize = int(resp)
-    data = s.recv(filesize)
+    data = client.recv(filesize)
     while len(data) < filesize:
         print("downloading..." + str(len(data)/filesize*100) + "%")
         data += s.recv(filesize - len(data))
-    destFilePath = "C:\\temp\\"
+    file_name = input("name for the file: ")   
+    filename = "{}.{}".format(file_name, ends)
+    destFilePath = "C:\\temp\\" + filename
+    print(destFilePath)
     f2 = open(destFilePath, "wb")
     f2.write(data)
     f2.close()
-
 
 def get_files(s, client, path):
     while True:
@@ -51,13 +59,19 @@ def get_files(s, client, path):
             folderOrBack = input("folder name to enter the folder\nback to go to the previous folder\ndown + file name to download specific file\n--->>>  ")
             if folderOrBack.lower() == "back":
                 path = deletePathLastElement(path) 
+                client.send("KEEP GO".encode())  
             elif folderOrBack.lower().split(" ")[0] == "down":
-                print("started")
-                download_file(s, client, path + folderOrBack.split(" ")[1] + "\\")    
-                print("finished")
+                client.send("DOWNLOAD".encode())
+                print(folderOrBack)
+                folderOrBack = folderOrBack.split(" ")
+                folderOrBack.pop(0)
+                folderOrBack = "".join(folderOrBack)
+                download_file(s, client, path + folderOrBack)    
+                print("Downloaded successfully.")      
+                sleep(2)      
             else:
                 path += folderOrBack + "\\"
-            client.send("KEEP GO".encode())  
+                client.send("KEEP GO".encode())  
          
 def ask_for_filename():
     return input("You chose to find a file from the C:\\ directory, enter the filename you want to find\n")

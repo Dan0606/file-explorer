@@ -1,7 +1,22 @@
 import socket
 import os
-HOST = '127.0.0.1'
-PORT = 52472 
+import threading
+
+HOST = '84.94.170.57'
+PORT = 12233 
+
+
+def send_file(s):
+    path = s.recv(1024).decode()
+    f1 = open(path, "rb")
+    fileBinaryText = f1.read()
+    filesize = str(len(fileBinaryText))
+    while len(filesize) < 10:
+        filesize = "0" + filesize
+    s.send(filesize.encode())
+    s.send(fileBinaryText)
+    f1.close()
+
 
 def show_files(s):
     path = s.recv(1024).decode()
@@ -27,8 +42,13 @@ def show_files(s):
     if startSending == "YES":
         s.send(strAllFilesWithType.encode())
     keepGo = s.recv(1024).decode()
-    if keepGo != "EXIT":
-        show_files(s)
+    if keepGo == "DOWNLOAD":
+        send_file_thread = threading.Thread(target=send_file, args=(s,))
+        send_file_thread.start()
+        send_file_thread.join()
+        keepGo = "KEEP GO"
+    if keepGo == "KEEP GO":
+        show_files(s)        
 
                 
 
@@ -64,17 +84,6 @@ def search_file_by_filename(filename):
                 print(os.path.join(r, full_filename))
                 return os.path.join(r, full_filename)
 
-
-def send_file(s):
-    path = s.recv(1024).decode()
-    f1 = open(path, "rb")
-    fileBinaryText = f1.read()
-    filesize = str(len(fileBinaryText))
-    while len(filesize) < 10:
-        filesize = "0" + filesize
-    s.send(filesize.encode())
-    s.send(fileBinaryText)
-    f1.close()
 
 def main():
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
